@@ -111,19 +111,21 @@ class MLflowCheckpoint(Callback):
 @click.argument("training_data")
 def run(training_data, epochs, batch_size, learning_rate, momentum, seed):
     warnings.filterwarnings("ignore")
-    data = pd.read_csv(training_data, sep=";")
-    # Split the data into training and test sets. (0.75, 0.25) split.
+    data = pd.read_parquet(training_data).sample(n = 100)
+
     train, test = train_test_split(data, random_state=seed)
     train, valid = train_test_split(train, random_state=seed)
-    # The predicted column is "quality" which is a scalar from [3, 9]
-    train_x = train.drop(["quality"], axis=1).astype("float32").values
-    train_y = train[["quality"]].astype("float32").values
-    valid_x = valid.drop(["quality"], axis=1).astype("float32").values
+    
+    label_col_name = "TotalCon"
+    
+    train_x = train.drop([label_col_name], axis=1).astype("float32").values
+    train_y = train[[label_col_name]].astype("float32").values
 
-    valid_y = valid[["quality"]].astype("float32").values
+    valid_x = valid.drop([label_col_name], axis=1).astype("float32").values
+    valid_y = valid[[label_col_name]].astype("float32").values
 
-    test_x = test.drop(["quality"], axis=1).astype("float32").values
-    test_y = test[["quality"]].astype("float32").values
+    test_x = test.drop([label_col_name], axis=1).astype("float32").values
+    test_y = test[[label_col_name]].astype("float32").values
 
     with mlflow.start_run():
         if epochs == 0:  # score null model
