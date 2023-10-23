@@ -1,1 +1,1 @@
-# CS2215_mlflow
+# CS2215 Cloud Computing
